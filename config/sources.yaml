@@ -23,6 +23,16 @@ sources:
     interval_minutes: 15
     added: 2026-10-01
     note: "collector testing only; no Event Monitoring license on this org (WT-3317)"
+  - id: vantage-prod
+    type: salesforce
+    collector: salesforce_eventlog
+    login_url: https://kestrelvantage-prod.my.salesforce.com
+    events: [Login, Logout, API, ReportExport, Setup, ApexExecution]
+    interval_minutes: 10
+    added: 2026-12-16
+    license_confirmed: false
+    onboarding_ticket: WT-3317
+    note: "REM-108; collector config ready, waiting on the Event Monitoring license for this org (WT-3317)"
   - id: kestrel-workspace
     type: workspace
     collector: workspace
