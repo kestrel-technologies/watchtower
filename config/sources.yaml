@@ -1,0 +1,2 @@
+# Watchtower event sources. Each source is collected by the named collector.
+sources: []
