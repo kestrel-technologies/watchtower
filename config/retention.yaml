@@ -1,0 +1,8 @@
+# Watchtower retention. EntSec standard KSS-MON-07 requires at least 12 months for every source.
+# Hot storage is searchable in the Watchtower console; after `hot_days` events move to the archive
+# tier and stay queryable through `watchtower` export jobs until `retain_months` has passed.
+# A per-source override may lengthen retention, never shorten it below 12 months.
+default:
+  hot_days: 14
+  retain_months: 12
+overrides: []
