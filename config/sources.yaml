@@ -1,2 +1,7 @@
 # Watchtower event sources. Each source is collected by the named collector.
-sources: []
+sources:
+  - id: kestrel-workspace
+    type: workspace
+    collector: workspace
+    interval_minutes: 15
+    added: 2020-04-20

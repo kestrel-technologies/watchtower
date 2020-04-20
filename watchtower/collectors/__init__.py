@@ -6,7 +6,7 @@ import importlib
 
 from watchtower.collectors.base import Collector
 
-NAMES: tuple[str, ...] = ()
+NAMES = ("workspace",)
 
 
 def get_collector(name: str) -> type[Collector]:
