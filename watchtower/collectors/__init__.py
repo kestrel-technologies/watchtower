@@ -6,7 +6,7 @@ import importlib
 
 from watchtower.collectors.base import Collector
 
-NAMES = ("workspace",)
+NAMES = ("workspace", "github")
 
 
 def get_collector(name: str) -> type[Collector]:

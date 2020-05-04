@@ -5,3 +5,8 @@ sources:
     collector: workspace
     interval_minutes: 15
     added: 2020-04-20
+  - id: roost
+    type: github
+    collector: github
+    interval_minutes: 15
+    added: 2020-05-04
