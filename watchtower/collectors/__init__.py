@@ -6,7 +6,7 @@ import importlib
 
 from watchtower.collectors.base import Collector
 
-NAMES = ("workspace", "github")
+NAMES = ("salesforce_eventlog", "workspace", "github")
 
 
 def get_collector(name: str) -> type[Collector]:

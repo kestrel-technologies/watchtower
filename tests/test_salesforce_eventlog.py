@@ -1,0 +1,44 @@
+from __future__ import annotations
+
+import datetime as dt
+
+from watchtower.collectors import get_collector
+from watchtower.collectors.salesforce_eventlog import (
+    SalesforceEventLogCollector,
+    build_eventlog_query,
+    parse_log_csv,
+)
+from watchtower.sources import parse_sources
+
+SINCE = dt.datetime(2020, 5, 27, 15, 0, tzinfo=dt.timezone.utc)
+
+
+def _source(events):
+    return parse_sources({"sources": [{
+        "id": "test-org", "type": "salesforce", "collector": "salesforce_eventlog",
+        "login_url": "https://test-org.my.salesforce.com", "events": events,
+        "interval_minutes": 10, "added": dt.date(2020, 6, 1),
+    }]})[0]
+
+
+def test_registry_returns_eventlog_collector():
+    assert get_collector("salesforce_eventlog") is SalesforceEventLogCollector
+
+
+def test_eventlog_query_lists_configured_types():
+    q = build_eventlog_query(["Login", "ReportExport"], SINCE)
+    assert "FROM EventLogFile" in q
+    assert "EventType IN ('Login', 'ReportExport')" in q
+    assert "Interval = 'Hourly'" in q
+    assert "LogDate >= 2020-05-27T15:00:00Z" in q
+
+
+def test_parse_login_csv(fixtures):
+    events = parse_log_csv((fixtures / "eventlog_login.csv").read_text(), "test-org")
+    assert [e.event_type for e in events] == ["Login", "Login"]
+    first, second = events
+    assert first.occurred_at == dt.datetime(2020, 5, 27, 15, 30, 12, 345000, tzinfo=dt.timezone.utc)
+    assert first.actor == "kenji.watanabe@kestrel.example"
+    assert first.source_ip == "192.0.2.10"
+    assert second.action == "/index.jsp"
+    assert second.raw["LOGIN_STATUS"] == "LOGIN_ERROR_INVALID_PASSWORD"

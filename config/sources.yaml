@@ -1,5 +1,13 @@
 # Watchtower event sources. Each source is collected by the named collector.
+# Salesforce sources require the Event Monitoring add-on on the org (docs/salesforce.md).
 sources:
+  - id: kestrel-corp-prod
+    type: salesforce
+    collector: salesforce_eventlog
+    login_url: https://kestrel-corp.my.salesforce.com
+    events: [Login, Logout, API, ReportExport]
+    interval_minutes: 10
+    added: 2020-06-01
   - id: kestrel-workspace
     type: workspace
     collector: workspace
