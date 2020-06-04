@@ -42,3 +42,8 @@ def test_parse_login_csv(fixtures):
     assert first.source_ip == "192.0.2.10"
     assert second.action == "/index.jsp"
     assert second.raw["LOGIN_STATUS"] == "LOGIN_ERROR_INVALID_PASSWORD"
+
+
+def test_session_identifiers_are_dropped(fixtures):
+    for e in parse_log_csv((fixtures / "eventlog_login.csv").read_text(), "test-org"):
+        assert "SESSION_KEY" not in e.raw and "LOGIN_KEY" not in e.raw

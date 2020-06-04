@@ -33,6 +33,10 @@ EVENT_LOG_TYPES = {
     "LightningInteraction": "LightningInteraction",
 }
 
+# Session identifiers are never stored (KES-SEC-1).
+DROP_COLUMNS = frozenset({"SESSION_KEY", "LOGIN_KEY"})
+
+
 def soql_datetime(value: dt.datetime) -> str:
     return value.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -63,7 +67,7 @@ def parse_log_csv(text: str, source_id: str) -> list[Event]:
     """Normalize one Event Log File (CSV) into Events."""
     out = []
     for row in csv.DictReader(io.StringIO(text)):
-        clean = {k: v for k, v in row.items() if v != ""}
+        clean = {k: v for k, v in row.items() if k not in DROP_COLUMNS and v != ""}
         out.append(
             Event(
                 source=source_id,
