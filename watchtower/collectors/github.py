@@ -16,7 +16,7 @@ from watchtower.collectors.base import Collector, Event
 
 DEFAULT_API = "https://roost.kestrel.example/api/v3"
 DEFAULT_ORG = "kestrel"
-PER_PAGE = 30
+PER_PAGE = 100
 NEXT_LINK = re.compile(r'<([^>]+)>;\s*rel="next"')
 
 
