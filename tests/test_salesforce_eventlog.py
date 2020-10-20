@@ -45,5 +45,12 @@ def test_parse_login_csv(fixtures):
 
 
 def test_session_identifiers_are_dropped(fixtures):
-    for e in parse_log_csv((fixtures / "eventlog_login.csv").read_text(), "test-org"):
-        assert "SESSION_KEY" not in e.raw and "LOGIN_KEY" not in e.raw
+    for name in ("eventlog_login.csv", "eventlog_logout.csv"):
+        for e in parse_log_csv((fixtures / name).read_text(), "test-org"):
+            assert "SESSION_KEY" not in e.raw and "LOGIN_KEY" not in e.raw
+
+
+def test_parse_falls_back_to_timestamp_column(fixtures):
+    (event,) = parse_log_csv((fixtures / "eventlog_logout.csv").read_text(), "test-org")
+    assert event.occurred_at == dt.datetime(2020, 5, 27, 17, 0, tzinfo=dt.timezone.utc)
+    assert event.actor == "005000000000001"
