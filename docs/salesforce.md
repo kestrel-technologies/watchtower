@@ -18,3 +18,10 @@ the **Event Monitoring add-on** on the org. Check the license before writing the
 | `Login`, `Logout`, `API`, `RestApi`, `BulkApi`, `Report`, `ReportExport`, `ApexExecution`, `URI`, `LightningInteraction` | EventLogFile, same EventType |
 
 API version: `v48.0` (`API_VERSION` in the module).
+
+## Troubleshooting
+
+- `INVALID_TYPE: sObject type 'EventLogFile' is not supported`: the run-as user lacks *View Event Log
+  Files*.
+- `invalid_grant` on the token call: the connected app's client credentials flow has no run-as user,
+  or the secret in Strongbox was rotated without updating the app.
