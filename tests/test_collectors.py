@@ -8,6 +8,7 @@ from conftest import FakeResponse, FakeSession
 from watchtower.collectors import NAMES, get_collector
 from watchtower.collectors.base import Event, credential_ref, ship
 from watchtower.collectors.github import parse_audit_log
+from watchtower.collectors.workspace import WorkspaceCollector
 from watchtower.sources import parse_sources
 
 SINCE = dt.datetime(2020, 5, 1, tzinfo=dt.timezone.utc)
@@ -30,6 +31,20 @@ def test_unknown_collector():
 
 def test_credential_ref_points_at_strongbox_path():
     assert credential_ref(_ws_source()) == "watchtower/workspace/ws"
+
+
+def test_workspace_follows_cursor():
+    session = FakeSession([
+        ("/activities", FakeResponse({"items": [{"time": "2020-05-01T10:00:00Z", "action": "login",
+                                                 "category": "auth", "actor": {"email": "lin.zhao@kestrel.example"}}],
+                                      "next": "c2"})),
+        ("/activities", FakeResponse({"items": [{"time": "2020-05-01T10:05:00Z", "action": "logout",
+                                                 "category": "auth"}]})),
+    ])
+    events = list(WorkspaceCollector(_ws_source(), {"api_token": "t"}, session).collect(SINCE))
+    assert [e.action for e in events] == ["login", "logout"]
+    assert events[0].actor == "lin.zhao@kestrel.example"
+    assert session.calls[1][2]["params"] == {"cursor": "c2", "limit": 1000}
 
 
 def test_roost_audit_log_parsing():

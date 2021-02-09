@@ -45,8 +45,13 @@ class WorkspaceCollector(Collector):
     def collect(self, since: dt.datetime) -> Iterator[Event]:
         headers = {"Authorization": f"Bearer {self.credentials['api_token']}"}
         params: dict[str, Any] = {"since": since.isoformat(), "limit": PAGE_SIZE}
-        body = self._get(f"{self.api}/activities", headers=headers, params=params).json()
-        yield from parse_activities(body.get("items", []), self.source.id)
+        while True:
+            body = self._get(f"{self.api}/activities", headers=headers, params=params).json()
+            yield from parse_activities(body.get("items", []), self.source.id)
+            cursor = body.get("next")
+            if not cursor:
+                return
+            params = {"cursor": cursor, "limit": PAGE_SIZE}
 
 
 COLLECTOR = WorkspaceCollector
