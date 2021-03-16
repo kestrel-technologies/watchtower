@@ -3,6 +3,6 @@
 # tier and stay queryable through `watchtower` export jobs until `retain_months` has passed.
 # A per-source override may lengthen retention, never shorten it below 12 months.
 default:
-  hot_days: 14
+  hot_days: 30
   retain_months: 12
 overrides: []
