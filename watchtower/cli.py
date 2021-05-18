@@ -31,12 +31,12 @@ def _since(value: str | None, interval_minutes: int) -> dt.datetime:
 
 def cmd_sources_list(args: argparse.Namespace) -> int:
     sources = load_sources(args.config)
-    rows = [("ID", "TYPE", "COLLECTOR", "EVERY", "ADDED")]
+    rows = [("ID", "TYPE", "COLLECTOR", "EVERY", "ADDED", "NOTE")]
     for s in sources:
-        rows.append((s.id, s.type, s.collector, f"{s.interval_minutes}m", s.added.isoformat()))
-    widths = [max(len(r[i]) for r in rows) for i in range(len(rows[0]))]
+        rows.append((s.id, s.type, s.collector, f"{s.interval_minutes}m", s.added.isoformat(), s.note or ""))
+    widths = [max(len(r[i]) for r in rows) for i in range(len(rows[0]) - 1)]
     for r in rows:
-        print("  ".join(c.ljust(w) for c, w in zip(r, widths)).rstrip())
+        print("  ".join(c.ljust(w) for c, w in zip(r, widths, strict=False)) + "  " + r[-1])
     return 0
 
 
