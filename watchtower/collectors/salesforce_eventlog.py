@@ -1,7 +1,8 @@
 """Salesforce Event Log File collector.
 
 Reads hourly EventLogFile records (Event Monitoring add-on) for the event types configured on the
-source, downloads each CSV log and normalizes its rows.
+source, downloads each CSV log and normalizes its rows. `Setup` events come from the SetupAuditTrail
+object instead, which every org has.
 
 Credential (Strongbox `watchtower/salesforce/<source-id>`): {"client_id": ..., "client_secret": ...}
 for a connected app using the OAuth 2.0 client credentials flow.
@@ -32,6 +33,7 @@ EVENT_LOG_TYPES = {
     "URI": "URI",
     "LightningInteraction": "LightningInteraction",
 }
+AUDIT_TRAIL_EVENT = "Setup"
 
 # Session identifiers are never stored (KES-SEC-1).
 DROP_COLUMNS = frozenset({"SESSION_KEY", "LOGIN_KEY"})
@@ -43,7 +45,7 @@ def soql_datetime(value: dt.datetime) -> str:
 
 def build_eventlog_query(events: list[str] | tuple[str, ...], since: dt.datetime,
                          interval: str = "Hourly") -> str | None:
-    """SOQL for the EventLogFile records to download; None if no configured event maps to a log file."""
+    """SOQL for the EventLogFile records to download; None if no configured event uses log files."""
     types = sorted({EVENT_LOG_TYPES[e] for e in events if e in EVENT_LOG_TYPES})
     if not types:
         return None
@@ -52,6 +54,13 @@ def build_eventlog_query(events: list[str] | tuple[str, ...], since: dt.datetime
         "SELECT Id, EventType, LogDate, Interval, LogFileLength FROM EventLogFile "
         f"WHERE Interval = '{interval}' AND EventType IN ({in_list}) "
         f"AND LogDate >= {soql_datetime(since)} ORDER BY LogDate"
+    )
+
+
+def build_audit_trail_query(since: dt.datetime) -> str:
+    return (
+        "SELECT Id, Action, Section, Display, CreatedDate, CreatedBy.Username, DelegateUser "
+        f"FROM SetupAuditTrail WHERE CreatedDate >= {soql_datetime(since)} ORDER BY CreatedDate"
     )
 
 
@@ -77,6 +86,23 @@ def parse_log_csv(text: str, source_id: str) -> list[Event]:
                 source_ip=row.get("SOURCE_IP") or row.get("CLIENT_IP") or None,
                 action=row.get("URI") or row.get("LOGIN_STATUS") or None,
                 raw=clean,
+            )
+        )
+    return out
+
+
+def parse_audit_trail(records: list[dict[str, Any]], source_id: str) -> list[Event]:
+    out = []
+    for r in records:
+        created_by = (r.get("CreatedBy") or {}).get("Username")
+        out.append(
+            Event(
+                source=source_id,
+                event_type=AUDIT_TRAIL_EVENT,
+                occurred_at=dt.datetime.fromisoformat(r["CreatedDate"].replace("Z", "+00:00")),
+                actor=created_by,
+                action=r.get("Action"),
+                raw={k: v for k, v in r.items() if k not in ("attributes", "CreatedBy")},
             )
         )
     return out
@@ -115,6 +141,8 @@ class SalesforceEventLogCollector(Collector):
         q = build_eventlog_query(self.source.events, since)
         if q:
             lines.append(f"  {q}")
+        if AUDIT_TRAIL_EVENT in self.source.events:
+            lines.append(f"  {build_audit_trail_query(since)}")
         return lines
 
     def collect(self, since: dt.datetime) -> Iterator[Event]:
@@ -125,6 +153,9 @@ class SalesforceEventLogCollector(Collector):
             for f in self._query(instance, headers, q):
                 url = f"{instance}/services/data/{API_VERSION}/sobjects/EventLogFile/{f['Id']}/LogFile"
                 yield from parse_log_csv(self._get(url, headers=headers).text, self.source.id)
+        if AUDIT_TRAIL_EVENT in self.source.events:
+            yield from parse_audit_trail(self._query(instance, headers, build_audit_trail_query(since)),
+                                         self.source.id)
 
 
 COLLECTOR = SalesforceEventLogCollector
