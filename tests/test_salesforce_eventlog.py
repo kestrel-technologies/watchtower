@@ -5,6 +5,7 @@ import datetime as dt
 from watchtower.collectors import get_collector
 from watchtower.collectors.salesforce_eventlog import (
     SalesforceEventLogCollector,
+    build_audit_trail_query,
     build_eventlog_query,
     parse_log_csv,
 )
@@ -25,12 +26,23 @@ def test_registry_returns_eventlog_collector():
     assert get_collector("salesforce_eventlog") is SalesforceEventLogCollector
 
 
-def test_eventlog_query_lists_configured_types():
-    q = build_eventlog_query(["Login", "ReportExport"], SINCE)
+def test_eventlog_query_lists_configured_types_and_skips_setup():
+    q = build_eventlog_query(["Login", "Setup", "ReportExport"], SINCE)
     assert "FROM EventLogFile" in q
     assert "EventType IN ('Login', 'ReportExport')" in q
     assert "Interval = 'Hourly'" in q
     assert "LogDate >= 2020-05-27T15:00:00Z" in q
+    assert "Setup" not in q
+
+
+def test_eventlog_query_is_none_when_only_setup():
+    assert build_eventlog_query(["Setup"], SINCE) is None
+
+
+def test_audit_trail_query():
+    q = build_audit_trail_query(SINCE)
+    assert q.startswith("SELECT Id, Action, Section")
+    assert "FROM SetupAuditTrail WHERE CreatedDate >= 2020-05-27T15:00:00Z" in q
 
 
 def test_parse_login_csv(fixtures):
