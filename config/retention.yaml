@@ -5,4 +5,7 @@
 default:
   hot_days: 30
   retain_months: 12
-overrides: []
+overrides:
+  - source: roost
+    retain_months: 24
+    reason: "source-control audit trail kept for two years"
