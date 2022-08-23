@@ -12,10 +12,12 @@ the **Event Monitoring add-on** on the org. Check the license before writing the
    Interval = 'Hourly' AND EventType IN (...) AND LogDate >= <since>`; each file's CSV is downloaded
    from `/sobjects/EventLogFile/<Id>/LogFile` and normalized. `SESSION_KEY` and `LOGIN_KEY` columns are
    dropped before storage.
+3. `Setup` events: `SetupAuditTrail` (available on every org, 180 days).
 
 | `events:` value | Read from |
 |---|---|
 | `Login`, `Logout`, `API`, `RestApi`, `BulkApi`, `Report`, `ReportExport`, `ApexExecution`, `URI`, `LightningInteraction` | EventLogFile, same EventType |
+| `Setup` | SetupAuditTrail |
 
 API version: `v48.0` (`API_VERSION` in the module).
 
