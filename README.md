@@ -5,6 +5,9 @@ API and data-export events from every in-scope platform, keeps them for 12 month
 This repository holds the **collectors** and the **source configuration**. The ingest API, storage and
 alerting rules live in the Watchtower platform itself (`https://watchtower.kestrel.example`).
 
+Owner: EntSec, Detection & Monitoring (Watchtower Collectors). Perch queue `WT`. Code owners:
+`watchtower-team`.
+
 ## Collectors
 
 | Collector | Reads | Module |
@@ -37,7 +40,7 @@ List the file with `watchtower sources list`; `pytest` validates it.
 
 ## Retention
 
-12 months for every source (`config/retention.yaml`; KSS-MON-07 sets the minimum). The first 14 days
+12 months for every source (`config/retention.yaml`; KSS-MON-07 sets the minimum). The first 30 days
 are hot and searchable in the console; older events are in the archive tier until they expire.
 Overrides may lengthen retention, never shorten it.
 
