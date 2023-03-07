@@ -5,14 +5,14 @@ sources:
     type: salesforce
     collector: salesforce_eventlog
     login_url: https://kestrel-corp.my.salesforce.com
-    events: [Login, Logout, API, ReportExport, Setup]
+    events: [Login, Logout, API, ReportExport, Setup, ApexExecution]
     interval_minutes: 10
     added: 2020-06-01
   - id: kestrel-cloud-sales-prod
     type: salesforce
     collector: salesforce_eventlog
     login_url: https://kestrel-cloud-sales.my.salesforce.com
-    events: [Login, Logout, API, ReportExport, Setup]
+    events: [Login, Logout, API, ReportExport, Setup, ApexExecution]
     interval_minutes: 10
     added: 2021-09-13
   - id: kestrel-workspace
