@@ -1,6 +1,6 @@
 # Salesforce sources
 
-Salesforce orgs are collected by `salesforce_eventlog`. It needs
+Salesforce orgs are collected by `salesforce_eventlog` (default) or `salesforce_realtime`. Both need
 the **Event Monitoring add-on** on the org. Check the license before writing the source entry
 (`docs/onboarding-a-source.md`).
 
@@ -20,6 +20,13 @@ the **Event Monitoring add-on** on the org. Check the license before writing the
 | `Setup` | SetupAuditTrail |
 
 API version: `v48.0` (`API_VERSION` in the module).
+
+## `salesforce_realtime`
+
+Polls the Real-Time Event Monitoring storage objects with SOQL every `interval_minutes`, so login and
+export events arrive within minutes instead of after the hourly log file. Supported `events:` values:
+`Login` (LoginEvent), `API` (ApiEvent), `ReportExport` (ReportEvent).
+Event storage must be enabled for each object in Setup → Event Manager.
 
 ## Troubleshooting
 
