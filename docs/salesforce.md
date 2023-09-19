@@ -25,7 +25,7 @@ API version: `v48.0` (`API_VERSION` in the module).
 
 Polls the Real-Time Event Monitoring storage objects with SOQL every `interval_minutes`, so login and
 export events arrive within minutes instead of after the hourly log file. Supported `events:` values:
-`Login` (LoginEvent), `API` (ApiEvent), `ReportExport` (ReportEvent).
+`Login` (LoginEvent), `API` (ApiEvent), `ReportExport` (ReportEvent), `URI` (LightningUriEvent).
 Event storage must be enabled for each object in Setup → Event Manager.
 
 ## Troubleshooting

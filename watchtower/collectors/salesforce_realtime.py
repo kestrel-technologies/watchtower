@@ -1,6 +1,6 @@
 """Salesforce Real-Time Event Monitoring collector.
 
-Polls the stored real-time event objects (LoginEvent, ApiEvent, ReportEvent) with
+Polls the stored real-time event objects (LoginEvent, ApiEvent, ReportEvent, LightningUriEvent) with
 SOQL instead of waiting for hourly log files, so authentication and export events reach Watchtower
 within minutes. Requires the Event Monitoring add-on with event storage enabled for each object.
 Same credential shape as salesforce_eventlog.
@@ -20,6 +20,7 @@ REALTIME_OBJECTS: dict[str, tuple[str, str]] = {
     "Login": ("LoginEvent", "EventIdentifier, EventDate, Username, SourceIp, Status, LoginType, Application"),
     "API": ("ApiEvent", "EventIdentifier, EventDate, Username, SourceIp, Operation, QueriedEntities"),
     "ReportExport": ("ReportEvent", "EventIdentifier, EventDate, Username, SourceIp, Operation, ReportId"),
+    "URI": ("LightningUriEvent", "EventIdentifier, EventDate, Username, SourceIp, Operation, QueriedEntities"),
 }
 
 
