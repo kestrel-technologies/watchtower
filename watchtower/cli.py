@@ -24,7 +24,7 @@ from watchtower.sources import (
 
 def _since(value: str | None, interval_minutes: int) -> dt.datetime:
     if value:
-        return dt.datetime.fromisoformat(value).astimezone(dt.timezone.utc)
+        return dt.datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(dt.timezone.utc)
     # one interval plus a five-minute overlap; the ingest API de-duplicates on (source, raw id)
     return dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=interval_minutes + 5)
 
