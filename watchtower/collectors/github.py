@@ -25,7 +25,7 @@ def parse_audit_log(entries: list[dict[str, Any]], source_id: str) -> list[Event
         Event(
             source=source_id,
             event_type=e.get("action", "").split(".", 1)[0] or "audit",
-            occurred_at=dt.datetime.fromtimestamp(e["@timestamp"] / 1000, tz=dt.timezone.utc),
+            occurred_at=dt.datetime.fromtimestamp(e["@timestamp"] / 1000, tz=dt.UTC),
             actor=e.get("actor"),
             source_ip=e.get("actor_ip"),
             action=e.get("action"),

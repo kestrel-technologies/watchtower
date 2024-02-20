@@ -44,7 +44,7 @@ class Event:
 
     def to_json(self) -> dict[str, Any]:
         d = asdict(self)
-        d["occurred_at"] = self.occurred_at.astimezone(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+        d["occurred_at"] = self.occurred_at.astimezone(dt.UTC).isoformat().replace("+00:00", "Z")
         return d
 
 

@@ -11,7 +11,7 @@ from watchtower.collectors.salesforce_eventlog import (
 )
 from watchtower.sources import parse_sources
 
-SINCE = dt.datetime(2020, 5, 27, 15, 0, tzinfo=dt.timezone.utc)
+SINCE = dt.datetime(2020, 5, 27, 15, 0, tzinfo=dt.UTC)
 
 
 def _source(events):
@@ -49,7 +49,7 @@ def test_parse_login_csv(fixtures):
     events = parse_log_csv((fixtures / "eventlog_login.csv").read_text(), "test-org")
     assert [e.event_type for e in events] == ["Login", "Login"]
     first, second = events
-    assert first.occurred_at == dt.datetime(2020, 5, 27, 15, 30, 12, 345000, tzinfo=dt.timezone.utc)
+    assert first.occurred_at == dt.datetime(2020, 5, 27, 15, 30, 12, 345000, tzinfo=dt.UTC)
     assert first.actor == "kenji.watanabe@kestrel.example"
     assert first.source_ip == "192.0.2.10"
     assert second.action == "/index.jsp"
@@ -64,5 +64,5 @@ def test_session_identifiers_are_dropped(fixtures):
 
 def test_parse_falls_back_to_timestamp_column(fixtures):
     (event,) = parse_log_csv((fixtures / "eventlog_logout.csv").read_text(), "test-org")
-    assert event.occurred_at == dt.datetime(2020, 5, 27, 17, 0, tzinfo=dt.timezone.utc)
+    assert event.occurred_at == dt.datetime(2020, 5, 27, 17, 0, tzinfo=dt.UTC)
     assert event.actor == "005000000000001"

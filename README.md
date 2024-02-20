@@ -13,6 +13,7 @@ Owner: EntSec, Detection & Monitoring (Watchtower Collectors). Perch queue `WT`.
 | Collector | Reads | Module |
 |---|---|---|
 | `salesforce_eventlog` | Salesforce Event Log Files (hourly) and the Setup Audit Trail | `watchtower/collectors/salesforce_eventlog.py` |
+| `salesforce_realtime` | Salesforce Real-Time Event Monitoring storage objects (LoginEvent, ApiEvent, ReportEvent, LightningUriEvent) | `watchtower/collectors/salesforce_realtime.py` |
 | `workspace` | Kestrel Workspace admin audit activities | `watchtower/collectors/workspace.py` |
 | `github` | Roost organization audit log | `watchtower/collectors/github.py` |
 
@@ -57,17 +58,15 @@ Short version (full checklist in [`docs/onboarding-a-source.md`](docs/onboarding
 ## Development
 
 ```sh
-python3 -m venv .venv && . .venv/bin/activate
-pip install -e . -r requirements-dev.txt
-flake8 watchtower tests
-pytest
-watchtower sources list
-watchtower collect --source kestrel-corp-prod --dry-run   # prints queries; no network calls
+uv sync                                   # Python 3.12
+uv run ruff check .
+uv run pytest
+uv run watchtower sources list
+uv run watchtower collect --source kestrel-corp-prod --dry-run   # prints queries; no network calls
 ```
 
-CI (`.github/workflows/ci.yml`, status `ci`) runs `flake8` and `pytest` on every CL and on pushes to
-`develop`, `uat` and `main`. Branches follow Flightpath: work lands on `develop`, is promoted to `uat`
-and then to `main` at the end of each sprint.
+CI (`.github/workflows/ci.yml`, status `ci`) runs `uv sync`, `ruff` and `pytest` on every CL and on pushes to `develop`, `uat` and `main`. Branches follow Flightpath: work lands on
+`develop`, is promoted to `uat` and then to `main` at the end of each sprint.
 
 ---
 

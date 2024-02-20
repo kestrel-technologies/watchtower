@@ -40,7 +40,7 @@ DROP_COLUMNS = frozenset({"SESSION_KEY", "LOGIN_KEY"})
 
 
 def soql_datetime(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return value.astimezone(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def build_eventlog_query(events: list[str] | tuple[str, ...], since: dt.datetime,
@@ -69,7 +69,7 @@ def parse_timestamp(row: dict[str, str]) -> dt.datetime:
     derived = row.get("TIMESTAMP_DERIVED")
     if derived:
         return dt.datetime.fromisoformat(derived.replace("Z", "+00:00"))
-    return dt.datetime.strptime(row["TIMESTAMP"], "%Y%m%d%H%M%S.%f").replace(tzinfo=dt.timezone.utc)
+    return dt.datetime.strptime(row["TIMESTAMP"], "%Y%m%d%H%M%S.%f").replace(tzinfo=dt.UTC)
 
 
 def parse_log_csv(text: str, source_id: str) -> list[Event]:

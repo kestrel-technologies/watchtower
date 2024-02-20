@@ -1,18 +1,20 @@
-# Lint and unit tests for watchtower. Status context: `ci`.
+# Flightpath Gate 1 for watchtower: lint and unit tests.
+# Status context: `ci` (required on develop, uat and main).
 name: ci
 on:
   pull_request: { branches: [develop, uat, main] }
   push: { branches: [develop, uat, main] }
+permissions: { contents: read }
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with: { python-version: '3.8' }
-      - name: install
-        run: pip install -e . -r requirements-dev.txt
-      - name: flake8
-        run: flake8 watchtower tests
+      - uses: astral-sh/setup-uv@887a942a15af3a7626099df99e897a18d9e5ab3a # v5.1.0
+        with: { python-version: '3.12' }
+      - name: uv sync
+        run: uv sync --locked
+      - name: ruff
+        run: uv run ruff check .
       - name: pytest
-        run: pytest
+        run: uv run pytest

@@ -11,7 +11,7 @@ from watchtower.collectors.github import parse_audit_log
 from watchtower.collectors.workspace import WorkspaceCollector
 from watchtower.sources import parse_sources
 
-SINCE = dt.datetime(2020, 5, 1, tzinfo=dt.timezone.utc)
+SINCE = dt.datetime(2020, 5, 1, tzinfo=dt.UTC)
 
 
 def _ws_source():
@@ -51,7 +51,7 @@ def test_roost_audit_log_parsing():
     (event,) = parse_audit_log([{"@timestamp": 1588327200000, "action": "repo.create", "actor": "kenji.watanabe",
                                  "actor_ip": "192.0.2.44"}], "roost")
     assert event.event_type == "repo"
-    assert event.occurred_at == dt.datetime(2020, 5, 1, 10, 0, tzinfo=dt.timezone.utc)
+    assert event.occurred_at == dt.datetime(2020, 5, 1, 10, 0, tzinfo=dt.UTC)
     assert event.source_ip == "192.0.2.44"
 
 
