@@ -16,16 +16,16 @@ link it in the CL title (`feat(sources): add <id> source [WT-1234]`).
     *View Event Log Files* and *View Setup and Configuration*, no other permissions.
   - Workspace: an audit-reader API token.
   - Roost: a read-only token with the audit-log scope.
-- [ ] Store it in Strongbox and note the path on the ticket. Never in this repository, a ticket or a
-      chat message.
+- [ ] Store it in Strongbox at `watchtower/<type>/<source-id>` (team vault `watchtower`). Never in this
+      repository, a ticket or a chat message.
 
 ## Configuration CL
 
 - [ ] Add the entry to `config/sources.yaml` (fields in the README). For Salesforce:
   - `login_url`: the org's My Domain URL.
   - `events`: start with `[Login, Logout, API, ReportExport, Setup, ApexExecution]`.
-- [ ] `pytest` passes locally (`tests/test_sources.py` loads the real file).
-- [ ] `watchtower collect --source <id> --dry-run` shows the expected queries.
+- [ ] `uv run pytest` passes locally (`tests/test_sources.py` loads the real file).
+- [ ] `uv run watchtower collect --source <id> --dry-run` shows the expected queries.
 
 ## After merge
 
