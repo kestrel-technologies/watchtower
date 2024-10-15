@@ -18,7 +18,7 @@ from typing import Any
 
 from watchtower.collectors.base import Collector, Event
 
-API_VERSION = "v48.0"
+API_VERSION = "v62.0"
 
 # events: value in sources.yaml -> EventLogFile.EventType
 EVENT_LOG_TYPES = {

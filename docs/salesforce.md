@@ -19,7 +19,7 @@ the **Event Monitoring add-on** on the org. Check the license before writing the
 | `Login`, `Logout`, `API`, `RestApi`, `BulkApi`, `Report`, `ReportExport`, `ApexExecution`, `URI`, `LightningInteraction` | EventLogFile, same EventType |
 | `Setup` | SetupAuditTrail |
 
-API version: `v48.0` (`API_VERSION` in the module).
+API version: `v62.0` (`API_VERSION` in the module).
 
 ## `salesforce_realtime`
 
