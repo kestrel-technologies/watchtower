@@ -8,6 +8,11 @@ link it in the CL title (`feat(sources): add <id> source [WT-1234]`).
 - [ ] Perch ticket open in `WT`, with the platform owner named and the data sensitivity of the
       platform (Kestrel Internal / Restricted).
 - [ ] The platform owner has agreed to the collector's access (read-only, audit scope only).
+- [ ] **Salesforce sources require the Event Monitoring add-on license on the org.** Without it the
+      org produces only daily Login and Logout log files with one day of retention: no API, report
+      export, Apex or hourly files, so KSS-MON-07 cannot be met. Ask the org owner for the license
+      confirmation (contract line or Setup → Company Information → Permission Set Licenses) and attach
+      it to the ticket. If the license has to be bought, the ticket stays **Blocked** until it is.
 
 ## Credential
 
