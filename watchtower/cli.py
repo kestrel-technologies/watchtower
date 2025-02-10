@@ -1,6 +1,8 @@
 """watchtower command line.
 
     watchtower sources list                     table of configured sources
+    watchtower sources validate                 schema check of config/sources.yaml
+    watchtower sources license-check            fail if a Salesforce source has license_confirmed: false
     watchtower collect --source <id> [--since 2026-10-01T00:00:00Z] [--dry-run]
 """
 
@@ -9,6 +11,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import logging
+import os
 import sys
 
 from watchtower import __version__
@@ -18,6 +21,7 @@ from watchtower.sources import (
     DEFAULT_CONFIG,
     SourceConfigError,
     get_source,
+    license_problems,
     load_sources,
 )
 
@@ -37,6 +41,28 @@ def cmd_sources_list(args: argparse.Namespace) -> int:
     widths = [max(len(r[i]) for r in rows) for i in range(len(rows[0]) - 1)]
     for r in rows:
         print("  ".join(c.ljust(w) for c, w in zip(r, widths, strict=False)) + "  " + r[-1])
+    return 0
+
+
+def cmd_sources_validate(args: argparse.Namespace) -> int:
+    sources = load_sources(args.config)
+    print(f"{args.config}: {len(sources)} sources OK")
+    return 0
+
+
+def cmd_license_check(args: argparse.Namespace) -> int:
+    sources = load_sources(args.config)
+    salesforce = [s for s in sources if s.is_salesforce]
+    problems = license_problems(sources)
+    in_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+    for p in problems:
+        if in_actions:
+            print(f"::error file={args.config},title=license-check::{p}")
+        print(p)
+    if problems:
+        print(f"license-check: FAILED ({len(problems)} of {len(salesforce)} Salesforce sources)")
+        return 1
+    print(f"license-check: OK ({len(salesforce)} Salesforce sources)")
     return 0
 
 
@@ -63,6 +89,10 @@ def build_parser() -> argparse.ArgumentParser:
     src = sub.add_parser("sources", help="inspect config/sources.yaml")
     src_sub = src.add_subparsers(dest="sources_command", required=True)
     src_sub.add_parser("list", help="list configured sources").set_defaults(func=cmd_sources_list)
+    src_sub.add_parser("validate", help="validate sources.yaml").set_defaults(func=cmd_sources_validate)
+    src_sub.add_parser(
+        "license-check", help="fail if any Salesforce source has license_confirmed: false"
+    ).set_defaults(func=cmd_license_check)
 
     col = sub.add_parser("collect", help="run one collection pass for a source")
     col.add_argument("--source", required=True, help="source id from sources.yaml")

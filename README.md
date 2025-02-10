@@ -36,8 +36,10 @@ One entry per monitored platform instance. The scheduler runs `watchtower collec
 | `interval_minutes` | Collection interval, 1–60 |
 | `added` | Date the source was onboarded |
 | `note` | Free text; say why if a source is limited in any way |
+| `license_confirmed` | Salesforce only: `true` once the Event Monitoring add-on is confirmed on the org; `false` until then |
+| `onboarding_ticket` | Perch ticket that tracks the onboarding (for example `WT-1234`) |
 
-List the file with `watchtower sources list`; `pytest` validates it.
+Check the file with `watchtower sources validate`; list it with `watchtower sources list`.
 
 ## Retention
 
@@ -50,9 +52,9 @@ Overrides may lengthen retention, never shorten it.
 Short version (full checklist in [`docs/onboarding-a-source.md`](docs/onboarding-a-source.md)):
 
 1. Open a ticket in the Perch `WT` queue.
-2. Create the collector credential and store it in Strongbox under `watchtower/<type>/<source-id>`.
-3. Add the entry to `config/sources.yaml` in a CL.
-4. Salesforce: the org needs the Event Monitoring add-on (`docs/salesforce.md`).
+2. Salesforce: confirm the Event Monitoring add-on license on the org before anything else.
+3. Create the collector credential and store it in Strongbox under `watchtower/<type>/<source-id>`.
+4. Add the entry to `config/sources.yaml` in a CL; CI runs `license-check`.
 5. Promote through Flightpath (`develop` → `uat` → `main`); the scheduler picks up `main`.
 
 ## Development
@@ -62,11 +64,14 @@ uv sync                                   # Python 3.12
 uv run ruff check .
 uv run pytest
 uv run watchtower sources list
+uv run watchtower sources license-check
 uv run watchtower collect --source kestrel-corp-prod --dry-run   # prints queries; no network calls
 ```
 
-CI (`.github/workflows/ci.yml`, status `ci`) runs `uv sync`, `ruff` and `pytest` on every CL and on pushes to `develop`, `uat` and `main`. Branches follow Flightpath: work lands on
-`develop`, is promoted to `uat` and then to `main` at the end of each sprint.
+CI (`.github/workflows/ci.yml`, status `ci`) runs `uv sync`, `ruff`, `pytest` and `license-check` on
+every CL and on pushes to `develop`, `uat` and `main`. The Flightpath Reviewer posts its verdict as
+`flightpath/reviewer`. Branches follow Flightpath: work lands on `develop`, is promoted to `uat` and then
+to `main` at the end of each sprint (`CHANGELOG.md`).
 
 ---
 

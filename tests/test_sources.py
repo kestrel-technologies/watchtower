@@ -73,6 +73,11 @@ def test_collector_must_match_type():
         parse_sources(_doc(collector="workspace"))
 
 
+def test_unknown_key_rejected():
+    with pytest.raises(SourceConfigError, match="unknown key"):
+        parse_sources(_doc(licence_confirmed=True))
+
+
 def test_all_problems_reported_at_once():
     with pytest.raises(SourceConfigError) as exc:
         parse_sources(_doc(interval_minutes=0, added="soon", login_url="http://x.example"))

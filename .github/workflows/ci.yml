@@ -1,4 +1,4 @@
-# Flightpath Gate 1 for watchtower: lint and unit tests.
+# Flightpath Gate 1 for watchtower: lint, unit tests and the Salesforce license check.
 # Status context: `ci` (required on develop, uat and main).
 name: ci
 on:
@@ -18,3 +18,8 @@ jobs:
         run: uv run ruff check .
       - name: pytest
         run: uv run pytest
+      # Every Salesforce source must have the Event Monitoring add-on on its org (docs/onboarding-a-source.md).
+      # Fails while any Salesforce source in config/sources.yaml has `license_confirmed: false`.
+      - name: license-check
+        id: license-check
+        run: uv run watchtower sources license-check

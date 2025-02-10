@@ -53,11 +53,17 @@ ALLOWED_KEYS = frozenset(
         "interval_minutes",
         "added",
         "note",
+        "license_confirmed",
+        "onboarding_ticket",
     }
 )
 
 ID_RE = re.compile(r"^[a-z][a-z0-9-]{1,62}$")
 LOGIN_URL_RE = re.compile(r"^https://[a-z0-9-]+\.my\.salesforce\.com$")
+TICKET_RE = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b")
+
+# Where a failed license check points when the source names no ticket.
+ONBOARDING_DOC = "docs/onboarding-a-source.md"
 
 
 class SourceConfigError(ValueError):
@@ -78,11 +84,22 @@ class Source:
     login_url: str | None = None
     events: tuple[str, ...] = ()
     note: str | None = None
+    # Salesforce only. True once the Event Monitoring add-on license is confirmed on the org; False
+    # while it is not. Sources onboarded before the field existed (2025-02) leave it unset.
+    license_confirmed: bool | None = None
+    onboarding_ticket: str | None = None
     raw: dict[str, Any] = field(default_factory=dict, compare=False, repr=False)
 
     @property
     def is_salesforce(self) -> bool:
         return self.type == "salesforce"
+
+    def ticket(self) -> str | None:
+        """The Perch ticket that tracks this source: `onboarding_ticket`, else the first ticket in `note`."""
+        if self.onboarding_ticket:
+            return self.onboarding_ticket
+        m = TICKET_RE.search(self.note or "")
+        return m.group(0) if m else None
 
 
 def _as_date(value: Any) -> dt.date | None:
@@ -143,6 +160,16 @@ def _parse_entry(entry: Any, index: int, problems: list[str]) -> Source | None:
     else:
         if login_url is not None:
             problems.append(f"{where}: login_url is only used by salesforce sources")
+        if entry.get("license_confirmed") is not None:
+            problems.append(f"{where}: license_confirmed is only used by salesforce sources")
+
+    license_confirmed = entry.get("license_confirmed")
+    if license_confirmed is not None and not isinstance(license_confirmed, bool):
+        problems.append(f"{where}: license_confirmed must be true or false")
+
+    ticket = entry.get("onboarding_ticket")
+    if ticket is not None and not (isinstance(ticket, str) and TICKET_RE.fullmatch(ticket)):
+        problems.append(f"{where}: onboarding_ticket must look like WT-1234")
 
     note = entry.get("note")
     if note is not None and not isinstance(note, str):
@@ -159,6 +186,8 @@ def _parse_entry(entry: Any, index: int, problems: list[str]) -> Source | None:
         login_url=login_url,
         events=tuple(events),
         note=note,
+        license_confirmed=license_confirmed,
+        onboarding_ticket=ticket,
         raw=dict(entry),
     )
 
@@ -190,3 +219,16 @@ def get_source(sources: list[Source], source_id: str) -> Source:
         if s.id == source_id:
             return s
     raise KeyError(f"no source with id {source_id!r} (see `watchtower sources list`)")
+
+
+def license_problems(sources: list[Source]) -> list[str]:
+    """One message per Salesforce source whose Event Monitoring license is recorded as not confirmed.
+
+    Without the add-on an org produces only daily Login and Logout log files, so a source with
+    `license_confirmed: false` cannot deliver the events it is configured for. CI fails on these.
+    """
+    out = []
+    for s in sources:
+        if s.is_salesforce and s.license_confirmed is False:
+            out.append(f"{s.id}: Event Monitoring license not confirmed, see {s.ticket() or ONBOARDING_DOC}")
+    return out

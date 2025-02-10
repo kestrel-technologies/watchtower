@@ -29,7 +29,11 @@ link it in the CL title (`feat(sources): add <id> source [WT-1234]`).
 - [ ] Add the entry to `config/sources.yaml` (fields in the README). For Salesforce:
   - `login_url`: the org's My Domain URL.
   - `events`: start with `[Login, Logout, API, ReportExport, Setup, ApexExecution]`.
-- [ ] `uv run pytest` passes locally (`tests/test_sources.py` loads the real file).
+  - `license_confirmed`: `true` only once the license confirmation is attached to the ticket;
+    `false` until then. CI's `license-check` fails while it is `false`, so the CL can be reviewed
+    but not merged.
+  - `onboarding_ticket`: the `WT` ticket.
+- [ ] `uv run watchtower sources validate` and `uv run watchtower sources license-check` pass locally.
 - [ ] `uv run watchtower collect --source <id> --dry-run` shows the expected queries.
 
 ## After merge
