@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import logging
 import os
 import sys
@@ -75,7 +76,14 @@ def cmd_collect(args: argparse.Namespace) -> int:
         print(f"credential: strongbox://{credential_ref(source)}")
         return 0
     collector = cls(source, credentials=Strongbox().read(credential_ref(source)))
-    ship(collector.collect(since))
+    if args.stdout:
+        n = 0
+        for ev in collector.collect(since):
+            print(json.dumps(ev.to_json(), sort_keys=True))
+            n += 1
+        logging.info("%s: %d events", source.id, n)
+    else:
+        ship(collector.collect(since))
     return 0
 
 
@@ -98,6 +106,7 @@ def build_parser() -> argparse.ArgumentParser:
     col.add_argument("--source", required=True, help="source id from sources.yaml")
     col.add_argument("--since", help="ISO timestamp (UTC); default: one interval ago")
     col.add_argument("--dry-run", action="store_true", help="print the plan; no network calls")
+    col.add_argument("--stdout", action="store_true", help="print events as JSON lines instead of shipping")
     col.set_defaults(func=cmd_collect)
     return p
 
