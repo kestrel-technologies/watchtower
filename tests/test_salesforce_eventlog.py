@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import datetime as dt
 
+from conftest import FakeResponse, FakeSession
+
 from watchtower.collectors import get_collector
 from watchtower.collectors.salesforce_eventlog import (
+    API_VERSION,
     SalesforceEventLogCollector,
     build_audit_trail_query,
     build_eventlog_query,
@@ -66,3 +69,26 @@ def test_parse_falls_back_to_timestamp_column(fixtures):
     (event,) = parse_log_csv((fixtures / "eventlog_logout.csv").read_text(), "test-org")
     assert event.occurred_at == dt.datetime(2020, 5, 27, 17, 0, tzinfo=dt.UTC)
     assert event.actor == "005000000000001"
+
+
+def test_collect_downloads_each_log_file(fixtures):
+    instance = "https://test-org.my.salesforce.com"
+    session = FakeSession([
+        ("/services/oauth2/token", FakeResponse({"access_token": "fixture-token", "instance_url": instance})),
+        ("/query", FakeResponse({"records": [{"Id": "0AT000000000001"}], "done": True})),
+        ("/EventLogFile/0AT000000000001/LogFile", FakeResponse(text=(fixtures / "eventlog_login.csv").read_text())),
+    ])
+    collector = SalesforceEventLogCollector(_source(["Login"]), {"client_id": "id", "client_secret": "x"}, session)
+    events = list(collector.collect(SINCE))
+    assert len(events) == 2
+    urls = [u for _, u, _ in session.calls]
+    assert urls[1] == f"{instance}/services/data/{API_VERSION}/query"
+    assert session.calls[1][2]["headers"] == {"Authorization": "Bearer fixture-token"}
+
+
+def test_describe_makes_no_network_calls():
+    session = FakeSession([])
+    lines = SalesforceEventLogCollector(_source(["Login", "Setup"]), session=session).describe(SINCE)
+    assert any("EventLogFile" in line for line in lines)
+    assert any("SetupAuditTrail" in line for line in lines)
+    assert session.calls == []
