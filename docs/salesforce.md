@@ -4,6 +4,19 @@ Salesforce orgs are collected by `salesforce_eventlog` (default) or `salesforce_
 the **Event Monitoring add-on** on the org. Check the license before writing the source entry
 (`docs/onboarding-a-source.md`).
 
+## What the add-on changes
+
+| | Without the add-on | With the add-on |
+|---|---|---|
+| Event log file types | Login, Logout | 70+ types, including API, ReportExport, ApexExecution, URI |
+| Log file interval | Daily | Hourly and daily |
+| Log file retention on the org | 1 day | 30 days |
+| Real-Time Event Monitoring | not available | LoginEvent, ApiEvent, ReportEvent, LightningUriEvent storage |
+| Transaction Security policies | not available | available |
+
+An org without the add-on cannot meet KSS-MON-07: no API, export or administrative events reach
+Watchtower.
+
 ## `salesforce_eventlog`
 
 1. Token: OAuth 2.0 client credentials flow against `<login_url>/services/oauth2/token`, with the
