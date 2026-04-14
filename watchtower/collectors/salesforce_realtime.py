@@ -18,8 +18,11 @@ from watchtower.collectors.salesforce_eventlog import API_VERSION, SalesforceEve
 # events: value in sources.yaml -> (storage object, fields)
 REALTIME_OBJECTS: dict[str, tuple[str, str]] = {
     "Login": ("LoginEvent", "EventIdentifier, EventDate, Username, SourceIp, Status, LoginType, Application"),
-    "API": ("ApiEvent", "EventIdentifier, EventDate, Username, SourceIp, Operation, QueriedEntities"),
-    "ReportExport": ("ReportEvent", "EventIdentifier, EventDate, Username, SourceIp, Operation, ReportId"),
+    "API": ("ApiEvent", "EventIdentifier, EventDate, Username, SourceIp, Operation, QueriedEntities, RowsProcessed"),
+    "ReportExport": (
+        "ReportEvent",
+        "EventIdentifier, EventDate, Username, SourceIp, Operation, ReportId, RowsProcessed",
+    ),
     "URI": ("LightningUriEvent", "EventIdentifier, EventDate, Username, SourceIp, Operation, QueriedEntities"),
 }
 
