@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 STRONGBOX_TEAM = "watchtower"
 DEFAULT_STRONGBOX_ADDR = "https://strongbox.kestrel.example"
 DEFAULT_INGEST_URL = "https://ingest.watchtower.kestrel.example/v1/events"
-INGEST_BATCH = 1000
+INGEST_BATCH = 500
 HTTP_TIMEOUT = 30
 
 
