@@ -2,7 +2,9 @@
 
 Reads hourly EventLogFile records (Event Monitoring add-on) for the event types configured on the
 source, downloads each CSV log and normalizes its rows. `Setup` events come from the SetupAuditTrail
-object instead, which every org has.
+object instead, which every org has. Orgs without the add-on only produce daily Login and Logout
+files; the collector falls back to those so a test source still yields something, but that is not
+production monitoring (docs/salesforce.md).
 
 Credential (Strongbox `watchtower/salesforce/<source-id>`): {"client_id": ..., "client_secret": ...}
 for a connected app using the OAuth 2.0 client credentials flow.
@@ -13,10 +15,13 @@ from __future__ import annotations
 import csv
 import datetime as dt
 import io
+import logging
 from collections.abc import Iterator
 from typing import Any
 
 from watchtower.collectors.base import Collector, Event
+
+log = logging.getLogger(__name__)
 
 API_VERSION = "v62.0"
 
@@ -150,7 +155,14 @@ class SalesforceEventLogCollector(Collector):
         headers = {"Authorization": f"Bearer {token}"}
         q = build_eventlog_query(self.source.events, since)
         if q:
-            for f in self._query(instance, headers, q):
+            files = self._query(instance, headers, q)
+            if not files:
+                daily = build_eventlog_query(self.source.events, since, interval="Daily")
+                files = self._query(instance, headers, daily) if daily else []
+                if files:
+                    log.warning("%s: no hourly log files; using daily files (Event Monitoring add-on "
+                                "not active on this org?)", self.source.id)
+            for f in files:
                 url = f"{instance}/services/data/{API_VERSION}/sobjects/EventLogFile/{f['Id']}/LogFile"
                 yield from parse_log_csv(self._get(url, headers=headers).text, self.source.id)
         if AUDIT_TRAIL_EVENT in self.source.events:

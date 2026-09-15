@@ -86,6 +86,20 @@ def test_collect_downloads_each_log_file(fixtures):
     assert session.calls[1][2]["headers"] == {"Authorization": "Bearer fixture-token"}
 
 
+def test_collect_falls_back_to_daily_files(fixtures):
+    instance = "https://test-org.my.salesforce.com"
+    session = FakeSession([
+        ("/services/oauth2/token", FakeResponse({"access_token": "t", "instance_url": instance})),
+        ("/query", FakeResponse({"records": [], "done": True})),
+        ("/query", FakeResponse({"records": [{"Id": "0AT000000000002"}], "done": True})),
+        ("/LogFile", FakeResponse(text=(fixtures / "eventlog_logout.csv").read_text())),
+    ])
+    collector = SalesforceEventLogCollector(_source(["Logout"]), {"client_id": "id", "client_secret": "x"}, session)
+    events = list(collector.collect(SINCE))
+    assert [e.event_type for e in events] == ["Logout"]
+    assert "Interval = 'Daily'" in session.calls[2][2]["params"]["q"]
+
+
 def test_describe_makes_no_network_calls():
     session = FakeSession([])
     lines = SalesforceEventLogCollector(_source(["Login", "Setup"]), session=session).describe(SINCE)

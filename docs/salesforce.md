@@ -14,8 +14,9 @@ the **Event Monitoring add-on** on the org. Check the license before writing the
 | Real-Time Event Monitoring | not available | LoginEvent, ApiEvent, ReportEvent, LightningUriEvent storage |
 | Transaction Security policies | not available | available |
 
-An org without the add-on cannot meet KSS-MON-07: no API, export or administrative events reach
-Watchtower.
+An org without the add-on can be collected for **testing** (the collector falls back to daily Login and
+Logout files and logs a warning), but that does not meet KSS-MON-07: no API, export or administrative
+events reach Watchtower.
 
 ## `salesforce_eventlog`
 
@@ -43,6 +44,8 @@ Event storage must be enabled for each object in Setup → Event Manager.
 
 ## Troubleshooting
 
+- `no hourly log files; using daily files`: the org has no Event Monitoring add-on, or event log
+  generation is off. Check the license first.
 - `INVALID_TYPE: sObject type 'EventLogFile' is not supported`: the run-as user lacks *View Event Log
   Files*.
 - `invalid_grant` on the token call: the connected app's client credentials flow has no run-as user,
