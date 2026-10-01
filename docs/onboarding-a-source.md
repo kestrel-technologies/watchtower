@@ -33,6 +33,9 @@ link it in the CL title (`feat(sources): add <id> source [WT-1234]`).
     `false` until then. CI's `license-check` fails while it is `false`, so the CL can be reviewed
     but not merged.
   - `onboarding_ticket`: the `WT` ticket.
+- [ ] Test-only sources on sandboxes without the license (collector testing against daily Login and
+      Logout files) leave `license_confirmed` out and say so in `note`. They do not count as
+      monitoring for the org's production instance.
 - [ ] `uv run watchtower sources validate` and `uv run watchtower sources license-check` pass locally.
 - [ ] `uv run watchtower collect --source <id> --dry-run` shows the expected queries.
 

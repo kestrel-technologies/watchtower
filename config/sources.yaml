@@ -15,6 +15,14 @@ sources:
     events: [Login, Logout, API, ReportExport, Setup, ApexExecution]
     interval_minutes: 10
     added: 2021-09-13
+  - id: vantage-uat
+    type: salesforce
+    collector: salesforce_eventlog
+    login_url: https://kestrelvantage-uat.my.salesforce.com
+    events: [Login, Logout]
+    interval_minutes: 15
+    added: 2026-10-01
+    note: "collector testing only; no Event Monitoring license on this org (WT-3317)"
   - id: kestrel-workspace
     type: workspace
     collector: workspace
