@@ -3,6 +3,12 @@
 Sprint promotions of `develop` to `uat` and `main` (Flightpath). Newest first. Earlier history:
 `git log --first-parent main`.
 
+## Sprint 2026-41 (promoted 2026-10-08)
+
+- sources: `vantage-uat` added for collector testing; daily Login/Logout files only, no Event Monitoring
+  license on that org [WT-3317]
+- docs: onboarding checklist covers test-only sources
+
 ## Sprint 2026-39 (promoted 2026-09-24)
 
 - salesforce_eventlog: fall back to daily log files when an org produces no hourly files [WT-3688]
